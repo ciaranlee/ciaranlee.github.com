@@ -1,0 +1,52 @@
+---
+layout: default
+title: Setting up an edge rails app
+---
+
+h1. {{ page.title }}
+
+Here is my recipe for setting up a rails app, using edge rails and git.
+
+* Check out edge rails. I use ~/src/ext to hold source checkouts of projects which aren't mine (mine go in ~/src)
+  <pre><code>git clone git://github.com/rails/rails.git</code></pre>
+
+* Then create the rails app. Rails now defaults to sqlite, so if you want to use mysql you will need to pass in <code>-dmysql</code> to the following command:
+  <pre><code>ruby ./ext/rails/railties/bin/rails $PROJECT</code></pre>
+
+* cd into the rails app and create a new git repository
+  <pre><code>git init</code></pre>
+
+* To stop git from adding logs and other artefacts to the repo, create a .gitignore file in the $PROJECT folder, containing the following lines
+  <pre><code>log/*.log
+tmp/**/*
+.DS_Store
+doc/api
+doc/app
+db/schema.rb</code></pre>
+
+* Unfortunately git won't track folders with no content, and as we are ignoring everything in the log/ and tmp/directories, git will see them as empty and they won't be checked out (same for other empty directories: db/ lib/ vendor/ app/models app/views but when content is added to them they will be tracked). This means that if you check out (clone) the project and run ./script/server the webserver won't start and there will be an error saying "Rails Error: Unable to access log file". The solution to this is to create and add a file called '.gitignore' to the log/ and tmp/ directories: 
+  <pre><code>touch log/.gitignore tmp/.gitignore</code></pre>
+
+
+
+* Now add all the newly created files, and commit them to the repository
+  <pre><code>git init
+git add .
+git commit -m "empty rails project import"</code></pre>
+
+* There is now a .git/ directory in the $PROJECT folder, this folder stores the repository. I like to store my code on another machine though so I copy the repo to a remote server:
+  <pre><code>scp -r $PROJECT_DIR user@$SERVER_IP:/desired/path/$PROJECT.git</code></pre>
+
+* The app can now be checked out from the server:
+  <pre><code>git clone user@$SERVER_IP:/desired/path/$PROJECT.git</code></pre>
+
+* To run an app on edge rails, you need to import edge rails into vendor/rails. I use "braid":http://evil.che.lu/projects/braid to track edge like so:
+  <pre><code>braid add git://github.com/rails/rails.git vendor/rails</code></pre>
+
+* This creates a branch called <code>braid/track</code> which can be merged back into the current branch like so
+  <pre><code>git merge braid/track</code></pre>
+
+* Start the server
+  <pre><code>./script/server</code></pre>
+
+The rails app is now running on edge!

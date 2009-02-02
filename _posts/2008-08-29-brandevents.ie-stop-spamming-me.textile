@@ -1,0 +1,12 @@
+---
+layout: default
+title: brandevents.ie - stop spamming me!
+---
+
+h1. {{ page.title }}
+
+I received an email from brandevents.ie today. It was the third unsolicited email they sent me. I complained after receiving the first mail on 18 April 2008, but they keep sending me mail! An interesting feature of their email marketing is that they choose not to bcc the recipients, so I can see all the other lucky people who are in with a chance of winning a trip to New York (in a competition for the title of 'Best Dressed Commuter in Dublin City')
+
+I rang brandevents, and when I asked to speak to the person (Scott) who sent the email I was told that there was no one called Scott working there...
+
+I forwarded the email I received today to the Data Protection Commisioners, hopefully they will fine them or something.

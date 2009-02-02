@@ -1,0 +1,31 @@
+---
+layout: default
+title: make_resourceful is awesome!
+---
+
+h1. {{ page.title }}
+
+I have started using "make_resourceful":http://mr.hamptoncatlin.com/ to DRY up my controller code. If you use the standard RESTful controllers, make_resourceful can reduce your controller to this:
+<pre><code>class AccountsController < ApplicationController
+  make_resourceful do
+    actions :all
+  end
+end</code></pre>
+
+That's pretty sweet. Of course often a controller might need to be modified slightly, for example I needed to do some set up work to display a google map for a resource (using the "ym4r_gm":http://www.railslodge.com/plugins/179-ym4r plugin). To set up the <code>@map</code> variable before rendering the view:
+<pre><code>make_resourceful do
+  actions :all
+  before :show do
+    # Set up the @map variable here
+  end
+end</code></pre>
+
+I then needed to access the names of some related models, rather than just their id's, and wanted to keep the generated SQL statements efficient. Turns out that's easy too, Just override the current_objects (for index), or current_object (for show) methods in your controller like so (best to have them as private methods):
+<pre><code>private
+def current_objects
+  @current_objects ||= Location.find(:all, :include => :related_object)
+end</code></pre>
+
+Note that <code>||=</code> is used instead of <code>=</code> in case the object has already been cached.
+
+Depending on how much customisation is required, it might turn out that using the standard REST controller is actually more efficient, but for a lot of the projects that I am working on that is not the case, and using make_resourceful makes my life easier :)

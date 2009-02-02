@@ -1,0 +1,64 @@
+---
+layout: default
+title: My Slicehost server setup
+---
+
+h1. {{ page.title }}
+
+I set up a new "slice":http://www.slicehost.com/ today using the following steps, most of which have I got from "these":http://articles.slicehost.com/2007/11/6/ubuntu-gutsy-setup-page-1 "three":http://articles.slicehost.com/2007/11/6/ubuntu-gutsy-setup-page-2 "articles":http://articles.slicehost.com/2007/11/23/ubuntu-gutsy-mysql-and-ror.
+
+I use "Ubuntu":http://www.ubuntu.com/ Gutsy on my servers. This setup gets me to the stage where I can deploy rails apps (which will be the topic of another post). Note that user specific values are preceded by the dollar sign, so for example I would replace @$USERNAME@ with ciaran.
+
+* Log in as root
+* Add universe and multiverse repos to the ubuntu archives in /etc/apt/sources.list
+* Update packages
+  <pre><code>apt-get update
+apt-get upgrade</code></pre>
+* Change root password (I use pwgen to create passwords) by running 'passwd' as root
+* Change default text editor to vim by running
+  <pre><code>update-alternatives --set editor /usr/bin/vim.basic</code></pre>
+* Add a standard user:
+  <pre><code>adduser $USERNAME</code></pre>
+* Allow standard user to use sudo to run commands as root by adding the following line to the end of the text file that is opened when 'visudo' is run as root:
+  <pre><code>$USERNAME  ALL=(ALL) ALL</code></pre>
+* Switch to the non-root user
+* Copy public key from my workstation to the server:
+  <pre><code>scp ~/.ssh/id_dsa.pub $USERNAME@$SERVER_IP:</code></pre>
+* Then on the server add it to the /home/$USERNAME/.ssh/authorized_keys file:
+  <pre><code>cat id_dsa.pub >>.ssh/authorized_keys</code></pre>
+* Log in to the server as the non-root user, there should be no password authentication now that the public key has been authorized
+* Disable root login over ssh, and disallow password logins, among other things, by making sure the following lines exists in /etc/ssh/sshd_config:
+  <pre><code>PermitRootLogin no
+PasswordAuthentication no
+X11Forwarding no
+UsePAM no
+UseDNS no
+AllowUsers $USERNAME</code></pre>
+* Restart the ssh server:
+  <pre><code>sudo /etc/init.d/ssh restart</code></pre>
+* Install rails + dependencies. I wouldn't actually use the ubuntu rails package, but if you install it it pulls in some dependencies which are useful.
+  <pre><code>sudo apt-get install rails libopenssl-ruby \
+  libopenssl-ruby1.8 ri1.8 ruby1.8-dev \
+  build-essential zip unzip</code></pre>
+* Install mysql + extras (set the root mysql password while you are at it!)
+  <pre><code>sudo apt-get install mysql-server mysql-client \
+  libmysqlclient15-dev libmysql-ruby</code></pre>
+* If you don't want to use InnoDB then edit /etc/mysql/my.cnf, and uncomment the following line:
+  <pre><code>#skip-innodb</code></pre>
+* Restart mysql
+  <pre><code>sudo /etc/init.d/mysql restart</code></pre>
+* "Download":http://rubyforge.org/frs/?group_id=126 and install rubygems, then symlink gem1.8 to gem:
+  <pre><code>sudo ln -s /usr/bin/gem1.8 /usr/bin/gem</code></pre>
+* Symlink irb1.8 to irb:
+  <pre><code>sudo ln -s /usr/bin/irb1.8 /usr/bin/irb</code></pre>
+* Install git
+  <pre><code>sudo apt-get install git-svn</code></pre>
+* Install ssmtp then edit the config file as follows:
+  <pre><code>root=$GMAIL_USERNAME@gmail.com
+mailhub=smtp.gmail.com:587
+AuthUser=$GMAIL_USERNAME@gmail.com
+AuthPass=$GMAIL_PASSWORD
+rewriteDomain=gmail.com
+UseSTARTTLS=YES
+hostname=$HOSTNAME
+FromLineOverride=YES</code></pre>

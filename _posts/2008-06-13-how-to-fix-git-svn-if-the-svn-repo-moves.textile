@@ -1,0 +1,19 @@
+---
+layout: default
+title: how to fix git-svn if the svn repo moves
+---
+
+h1. {{ page.title }}
+
+I'm using git-svn at the moment, as the owner of a project I'm working on is using subversion. The svn server has just moved to a new domain name. Unfortunately this broke git-svn as I couldn't rebase (got an error like this: <br>"RA layer request failed: PROPFIND request failed on '/svn': PROPFIND of '/svn': 200 OK (http://$OLD_DNS_NAME) at /usr/local/bin/git-svn line 1839" )
+
+Just editing .git/config and changing the url for the svn repo doesn't work as rebasing will produce the following error: <code>Unable to determine upstream SVN information from working tree history</code>.
+
+The solution to this problem is as follows:
+
+* edit the svn-remote url URL in .git/config to point to the new domain name
+* run <code>git svn fetch</code>
+* change svn-remote url back to the original url
+* run <code>git svn rebase -l</code> to do a local rebase (with the changes that came in with the last fetch operation)
+* change svn-remote url back to the new url
+* <code>git svn rebase</code> should now work again!

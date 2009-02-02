@@ -1,0 +1,75 @@
+---
+layout: default
+title: Rails deployment with Vlad, Git, Thin, and Nginx
+---
+
+h1. {{ page.title }}
+
+This is how I deploy a rails app to a single server
+
+Note that I use variable names like $APP_NAME, or $REPO_IP, these need to be replaced by values appropriate for your app. The names are fairly self-explanatory. For consistency I always use full paths to folders, so $REPO_PATH might be replaced by /home/git/repo/blog.git
+
+Here goes...
+
+* If you don't want to have to type in the password when checking out the app from your code repo, follow "these instructions":http://blog.macromates.com/2005/subversion-support-and-ssh-key-pairs/ to set up ssh key pairs.
+
+* Install vlad on development machine:
+  <pre><code>sudo gem install vlad</code></pre>
+  
+* Install thin on server AND dev machine
+  <pre><code>sudo gem install thin</code></pre>
+
+* Add the following to a rake file in your rails app (lib/tasks/app.rake in my case):
+  <pre><code>begin
+  require 'vlad'
+  Vlad.load :scm => :git, :app => :thin
+rescue LoadError
+  # do nothing
+end</code></pre>
+
+* At the moment the Vlad gem doesn't ship with any thin-specific tasks, but fortunately the thin gem does (in example/vlad.rake). This rake file needs to be copied into the lib/vlad directory of the installed vlad gem. On leopard this means the following command, Linux (and possibly Tiger?) users will need to use different paths:
+  <pre><code>sudo cp /Library/Ruby/Gems/1.8/gems/thin-0.6.3/example/vlad.rake \
+    /Library/Ruby/Gems/1.8/gems/vlad-1.2.0/lib/vlad/thin.rb</code></pre>
+
+* Add deployment settings to config/deploy.rb:
+  <pre><code>set :domain, "$SERVER_IP"
+set :deploy_to, "$DEPLOYED_APP_PATH"
+set :repository, "$REPO_IP:/$REPO_PATH"</code></pre>
+
+* Create production database on the server, then edit the production settings in database.yml, specifying the username and password you use to connect to the database as well as the path to the socket. On Ubuntu the mysql socket is at /var/run/mysqld/mysqld.sock , as opposed to /tmp/mysql.sock on OS X
+
+* To create the directory structure to which the rails app will be deployed, as well as a configuration file for the application server, run the following command from the development machine:
+  <pre><code>rake vlad:setup</code></pre>
+
+* If you open up $DEPLOYED_APP_PATH/shared/thin_cluster.conf on the server, you will see that thin is going to use unix sockets, which are "faster":http://macournoyer.wordpress.com/2008/01/26/get-intimate-with-your-load-balancer-tonight/ than TCP ports.
+
+* To checkout the project, run any migrations and start the app servers, run the following command from your dev machine:
+  <pre><code>rake vlad:update vlad:migrate vlad:start_app</code></pre>
+
+* If you have gotten this far, your app will be up and running, but not useable, as the webserver isn't set up.
+
+* Here's my standard vlad:deploy task, which I add to my rakefile:
+  <pre><code>namespace :vlad do
+  desc "Showtime! pull from git then (re)start the app servers"
+  task :deploy => [:update, :migrate, :start_app]
+end</code></pre>
+
+* Install nginx if you haven't already:
+  <pre><code>sudo apt-get install nginx</code></pre>
+
+* The Ubuntu and Debian nginx packages have a "nice convention":http://articles.slicehost.com/2007/12/12/ubuntu-gutsy-nginx-config-layout for setting up and enabling multiple domains with separate config files. I modify this "template configuration file":http://pastie.textmate.org/private/npnmuhcifu5duhjz0mylg by replacing the $VALUES with my own, then save it to /etc/nginx/sites-available/$APP_NAME 
+
+* I also make a few changes to the default nginx.conf in /etc/nginx/nginx.conf - see "here":http://pastie.textmate.org/private/bymjdcqbgrzusenjg71pw
+
+* The nginx configuration can be checked by running
+  <pre><code>sudo nginx -t</code></pre>
+
+* Assuming there were no configuration errors, the nginx config file for the rails app can be symlinked into the sites-enabled directory
+  <pre><code>sudo ln -s /etc/nginx/sites-available/$APP \
+  /etc/nginx/sites-enabled/$APP</code></pre>
+
+* Reload the nginx configuration
+  <pre><code>sudo /etc/init.d/nginx reload</code></pre>
+
+The app should now be up and running with Nginx proxying it on port 80... success! From now on, to update the deployment just push to the git repo then run
+  <pre><code>rake vlad:deploy</code></pre>
