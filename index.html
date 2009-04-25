@@ -3,11 +3,12 @@ layout: default
 title: Ciaran Lee
 ---
 
-<h1>Posts</h1>
-<ul>
-  {% for post in site.posts %}
-    <li><a href="{{ post.url }}">{{ post.title }}</a></li>
+<h1>Recent posts</h1>
+<ul class="posts">
+  {% for post in site.posts limit:5 %}
+    <li><span class="date">{{ post.date | date_to_string }}</span> <a href="{{ post.url }}">{{ post.title }}</a></li>
   {% endfor %}
+  <li><a href="/archives.html">older posts</a></li>
 </ul>
 
 
