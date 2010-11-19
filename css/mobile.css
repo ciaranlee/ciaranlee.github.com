@@ -8,7 +8,7 @@ padding-right: 0px;
 
 .onecol, .twocol, .threecol, .fourcol, .fivecol, .sixcol, .sevencol, .eightcol, .ninecol, .tencol, .elevencol, .twelvecol {
 width: auto;
-width: -moz-available;
+float: none;
 margin-left: 0px;
 margin-right: 0px;
 padding-left: 20px;
