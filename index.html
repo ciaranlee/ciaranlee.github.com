@@ -2,22 +2,29 @@
 layout: default
 title: Ciaran Lee
 ---
+<div class="fourcol">
+  <h1>About me</h1>
+  {{'I am a rails developer. I work at "Contrast":http://contrast.ie, previously I worked as lead developer on "RateMyArea":http://ratemyarea.com . People like me because I am polite and am rarely late.' | textilize}}
+</div>
 
-<h1>Recent posts</h1>
-<ul class="posts">
-  {% for post in site.posts limit:5 %}
-    <li><span class="date">{{ post.date | date_to_string }}</span> <a href="{{ post.url }}">{{ post.title }}</a></li>
-  {% endfor %}
-  <li><a href="/archives.html">older posts</a></li>
-</ul>
+<div class="fourcol">
+  <h1>Links to me on other sites</h1>
+  <ul>
+    <li><a href="http://twitter.com/ciaran_lee">Twitter</a></li>
+    <li><a href="http://www.flickr.com/photos/lee_ciaran/">Flickr</a></li>
+    <li><a href="http://www.ratemyarea.com/people/ciaran-2">RateMyArea</a></li>
+    <li><a href="http://delicious.com/ciaran.lee">Delicious</a></li>
+    <li><a href="http://www.last.fm/user/lee_ciaran">Last.fm</a></li>
+    <li><a href="http://www.linkedin.com/pub/2/b40/51b">LinkedIn</a></li>
+  </ul>
+</div>
 
-
-<h1>Other stuff</h1>
-<ul>
-  <li><a href="http://twitter.com/ciaran_lee">Twitter</a></li>
-  <li><a href="http://www.flickr.com/photos/lee_ciaran/">Flickr</a></li>
-  <li><a href="http://www.ratemyarea.com/people/ciaran-2">RateMyArea</a></li>
-  <li><a href="http://delicious.com/ciaran.lee">Delicious</a></li>
-  <li><a href="http://www.last.fm/user/lee_ciaran">Last.fm</a></li>
-  <li><a href="http://www.linkedin.com/pub/2/b40/51b">LinkedIn</a></li>
-</ul>
+<div class="fourcol last">
+  <h1>Very old blog posts</h1>
+  <ul class="posts">
+    {% for post in site.posts limit:5 %}
+      <li><span class="date">{{ post.date | date_to_string }}</span> <a href="{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+    <li><a href="/archives.html">older posts</a></li>
+  </ul>
+</div>
